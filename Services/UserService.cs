@@ -1,5 +1,9 @@
 ﻿using System.Linq.Expressions;
+using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using MolyCoreWeb.Models.DBEntitiy;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Repositorys;
@@ -9,11 +13,13 @@ public class UserService : IUserService
 {
     private readonly IRepository<User> _userRepository;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UserService(IRepository<User> userRepository, IMapper mapper)
+    public UserService(IRepository<User> userRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<IEnumerable<User>> GetAllUserAsync()
@@ -94,5 +100,48 @@ public class UserService : IUserService
             UserName = user.UserName,
             Password = user.PasswordHash
         };
+    }
+
+    public async Task SignInAsync(UserDto userDto, bool isPersistent)
+    {
+        var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userDto.UserName),
+                new Claim(ClaimTypes.NameIdentifier, userDto.UserId.ToString())
+            };
+
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var authProperties = new AuthenticationProperties
+        {
+            IsPersistent = isPersistent
+        };
+
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext != null)
+        {
+            await httpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+        }
+        else
+        {
+            throw new InvalidOperationException("HttpContext is null. Unable to sign in the user.");
+        }
+    }
+
+    public async Task SignOutAsync()
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext != null)
+        {
+            await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+        else
+        {
+            throw new InvalidOperationException("HttpContext is null. Unable to sign out the user.");
+        }
     }
 }

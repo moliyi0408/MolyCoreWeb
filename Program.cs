@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using MolyCoreWeb.Datas;
 using MolyCoreWeb.Models.DTOs;
@@ -21,6 +22,15 @@ builder.Services.AddScoped<IUserService, UserService>();
 //automapper configuration
 builder.Services.AddAutoMapper(typeof(Program));
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/User/Login";
+                options.LogoutPath = "/User/Logout";
+            });
+
+// 注册 IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

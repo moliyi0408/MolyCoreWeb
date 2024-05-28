@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Models.ViewModels;
 using MolyCoreWeb.Services;
@@ -20,10 +22,9 @@ namespace MolyCoreWeb.Controllers
             return View();
         }
 
-
         //UserViewModel 來接收從視圖傳遞過來的用戶輸入
         [HttpPost]
-        public IActionResult Login(UserViewModel model)
+        public async Task<IActionResult> Login(UserViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -36,6 +37,7 @@ namespace MolyCoreWeb.Controllers
                 var user = _userService.Authenticate(userDto);
                 if (user != null)
                 {
+                    await _userService.SignInAsync(user, true);
                     // 登錄成功，重定向到首頁
                     return RedirectToAction("Index", "Home");
                 }
@@ -47,12 +49,26 @@ namespace MolyCoreWeb.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _userService.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
         // 管理頁面
         public async Task<IActionResult> ManagementAsync()
         {
             var users = await _userService.GetAllUserAsync();
             return View(users);
         }
+
+        // 個人資料頁面
+        public IActionResult UserProfile()
+        {
+            return View();
+        }
+        
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()

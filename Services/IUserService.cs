@@ -7,5 +7,8 @@ namespace MolyCoreWeb.Services
     {
         UserDto Authenticate(UserDto userDto);
         Task<IEnumerable<User>> GetAllUserAsync();
+        Task SignInAsync(UserDto userDto, bool isPersistent);
+        Task SignOutAsync();
+
     }
 }
