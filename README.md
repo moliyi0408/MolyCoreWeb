@@ -7,7 +7,6 @@ Database <=> DbContext  <=> Domain Model  <=> Repository <=> Service <=> DTO <=>
  使用Domain Model 映射Database（
 >Domain Model：與數據庫表直接對應的實體類 
 >Repository：資料存取層，封裝資料庫操作，提供對資料的CRUD操作。
- - Unit of work 實現
 >Service：業務邏輯層，處理應用程式的業務邏輯。  
  - AutoMapper 映射到Dto
   
