@@ -34,11 +34,11 @@ namespace MolyCoreWeb.Services
             return _mapper.ProjectTo<UserDto>(users);
         }
 
-        public void Update(UserDto userDto)
+        public async Task Update(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
             _userRepository.Update(user);
-            _userRepository.SaveChanges();
+            await _userRepository.SaveChanges();
         }
 
         public void Delete(UserDto entity)

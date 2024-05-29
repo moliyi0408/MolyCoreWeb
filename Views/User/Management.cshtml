@@ -1,15 +1,14 @@
 ﻿@model IEnumerable<MolyCoreWeb.Models.DBEntitiy.User>
-@*  @model IEnumerable<MolyCoreWeb.Models.DTOs.UserDto> *@
 
 <h1>Index</h1>
-
- <table class="table">
+<table class="table">
     <thead>
-            <tr>
-                <th>User ID</th>
-                <th>Username</th>
-                <th>Password</th>
-            </tr>      
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Actions</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (var user in Model)
@@ -19,12 +18,46 @@
                 <td>@user.UserName</td>
                 <td>@user.PasswordHash</td>
                 <td>
+                    <button type="button" class="btn btn-primary" onclick="showEditForm(@user.UserId)">Edit</button>
+
                     <form asp-action="Delete" method="post" style="display:inline;">
                         <input type="hidden" name="id" value="@user.UserId" />
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
                     </form>
                 </td>
-            </tr>    
+            </tr>
+            <tr id="edit-form-@user.UserId" style="display:none;">
+                <td colspan="4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="UserId" value="@user.UserId" /> <!-- Change here to use name="UserId" -->
+                        <div class="form-group">
+                            <label asp-for="@user.UserName"></label>
+                            <input asp-for="@user.UserName" name="UserName" class="form-control"  />
+                         @*    模型綁定，要 有 name 屬性，並且屬性名稱與控制器操作方法參數的屬性名稱相符 *@
+                            <span asp-validation-for="@user.UserName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="@user.PasswordHash"></label>
+                            <input asp-for="@user.PasswordHash" name="Password" class="form-control" />
+                            <span asp-validation-for="@user.PasswordHash" class="text-danger"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideEditForm(@user.UserId)">Cancel</button>
+                    </form>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
+
+<script>
+    function showEditForm(userId) {
+        var form = document.getElementById('edit-form-' + userId);
+        form.style.display = 'table-row';
+    }
+
+    function hideEditForm(userId) {
+        var form = document.getElementById('edit-form-' + userId);
+        form.style.display = 'none';
+    }
+</script>

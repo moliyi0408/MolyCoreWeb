@@ -2,10 +2,13 @@
 
 namespace MolyCoreWeb.Models.ViewModels
 {
-    public class UserViewModel
+    public class LoginViewModel
     {
-        public int UserId { get; set; }
+        [Required]
         public string UserName { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
     }
 }

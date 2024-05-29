@@ -56,9 +56,9 @@ namespace MolyCoreWeb.Repositorys
             _dbSet.Remove(entity);
         }
 
-        public void SaveChanges()
+        public async Task SaveChanges()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public async Task<User> GetUserByUsernameAndPassword(string username, string password)

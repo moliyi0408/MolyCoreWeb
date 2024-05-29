@@ -18,7 +18,7 @@ namespace MolyCoreWeb.Repositorys
         // 刪除一筆資料內容。
         void Delete(TEntity entity);
         // 儲存異動。
-        void SaveChanges();
+        Task SaveChanges();
 
         Task<User> GetUserByUsernameAndPassword(string username, string password);
 

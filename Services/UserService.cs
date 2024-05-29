@@ -30,9 +30,10 @@ namespace MolyCoreWeb.Services
             throw new NotImplementedException();
         }
 
-        public void Update(User entity)
+        public async Task Update(User user)
         {
-            throw new NotImplementedException();
+            _userRepository.Update(user);
+            await _userRepository.SaveChanges();
         }
 
         public void Delete(User entity)
@@ -46,7 +47,7 @@ namespace MolyCoreWeb.Services
             if (user != null)
             {
                 _userRepository.Delete(user);
-                _userRepository.SaveChanges();
+                await _userRepository.SaveChanges();
             }
         }
 
@@ -56,9 +57,9 @@ namespace MolyCoreWeb.Services
             return users;
         }
 
-        public Task<User> GetByIdAsync(int id)
+        public async Task<User> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _userRepository.GetByIdAsync(id);
         }
 
      

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Models.ViewModels;
 using MolyCoreWeb.Services;
+using MolyCoreWeb.Models.DBEntitiy;
 
 namespace MolyCoreWeb.Controllers
 {
@@ -27,7 +28,7 @@ namespace MolyCoreWeb.Controllers
 
         //UserViewModel 來接收從視圖傳遞過來的用戶輸入
         [HttpPost]
-        public async Task<IActionResult> Login(UserViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -67,6 +68,32 @@ namespace MolyCoreWeb.Controllers
             return View(users);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserViewModel model)
+        {
+            var existingUser = await _userService.GetByIdAsync(model.UserId);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            existingUser.UserName = model.UserName;
+            existingUser.PasswordHash = model.Password;
+          
+            // 更新其他属性
+
+            await _userService.Update(existingUser);
+            return RedirectToAction("Management");
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _userService.DeleteAsync(id);
+            return RedirectToAction("Management");
+        }
+
         // 個人資料頁面
         public async Task<IActionResult> UserProfile(int id)
         {
@@ -78,12 +105,5 @@ namespace MolyCoreWeb.Controllers
             return View(user);
         }
 
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _userService.DeleteAsync(id);
-            return RedirectToAction("Management");
-        }
     }
 }
