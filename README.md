@@ -3,18 +3,21 @@ Database <=> DbContext  <=> Domain Model  <=> Repository <=> Service <=> DTO <=>
 ## 架構實現
 >Database（資料庫）：實際的資料儲存。   
 - Sqlite 實作建置
+
 >DbContext：資料庫底層，管理實體和資料庫之間的關係
- 使用Domain Model 映射Database（
->Domain Model：與數據庫表直接對應的實體類 
+ 使用Domain Model 映射Database  
+
+>Domain Model：與數據庫表直接對應的實體類   
+
 >Repository：資料存取層，封裝資料庫操作，提供對資料的CRUD操作。
+
 >Service：業務邏輯層，處理應用程式的業務邏輯。  
  - AutoMapper 映射到Dto
-  
 >ViewModel：視圖模型，封裝視圖所需的資料
 
 >Controller：控制器層，處理HTTP請求和回應，呼叫服務層的方法。
  - basecontroller 實作强類型的 RedirectToAction
-
+  
 >View：視圖層，呈現使用者介面。
 
 ## 功能實現
