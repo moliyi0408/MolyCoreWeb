@@ -1,5 +1,6 @@
 ## 架構 
 Database <=> DbContext  <=> Domain Model  <=> Repository <=> Service <=> DTO <=> Controller <=> ViewModel <=> View
+
 ## 架構實現
 >Database（資料庫）：實際的資料儲存。   
 - Sqlite 實作建置
@@ -21,21 +22,12 @@ Database <=> DbContext  <=> Domain Model  <=> Repository <=> Service <=> DTO <=>
 >View：視圖層，呈現使用者介面。
 
 ## 功能實現
-
 - 首頁
 - 使用者相關 UserController  
-  登入功能 => 登入驗證頁面Login.cshtml
+  - 登入功能 => 登入驗證頁面Login.cshtml
   使用UserViewModel 接收 使用者輸入  ，使用userService.Authenticate進行使用者資料驗證同時記性資料錯誤alarm提示
   ，驗證成功後，使用userService.SignInAsync進行Cookies紀錄登入狀態 權限  
-
-  登出 userService.SignOutAsync() 移除身分驗證Cookies 並導向首頁
--
- - 管理使用者資訊 UserManagementController.cs  
+  - 登出 userService.SignOutAsync() 移除身分驗證Cookies 並導向首頁
+  - 管理使用者資訊頁面 UserManagementController.cs  
 Delete => 刪除使用者 =>  ASP.NET Core Post => UserManagementController => Task<IActionResult> Delete  
 Edit =>編輯使用者 =>  JavaScript Post => UserManagementController => Task<IActionResult> Edit  
-
-
-   
-   登入確認  
-     
-   登入紀錄
