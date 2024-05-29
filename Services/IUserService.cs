@@ -1,15 +1,12 @@
 ﻿using MolyCoreWeb.Models.DBEntitiy;
 using MolyCoreWeb.Models.DTOs;
+using System.Threading.Tasks;
 using static MolyCoreWeb.Services.UserService;
 
 namespace MolyCoreWeb.Services
 {
-    public interface IUserService : IService<UserDto>
+    public interface IUserService : IService<User>
     {
-        AuthenticationResult Authenticate(UserDto userDto);
-        Task<IEnumerable<User>> GetAllUserAsync();
-        Task SignInAsync(UserDto userDto, bool isPersistent);
-        Task SignOutAsync();
-
+        Task DeleteAsync(int id);
     }
 }

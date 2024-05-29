@@ -17,8 +17,9 @@ builder.Services.AddDbContext<WebDbContext>(options =>
 
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-//builder.Services.AddScoped<IService<UserDto>, UserService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+
 //automapper configuration
 builder.Services.AddAutoMapper(typeof(Program));
 

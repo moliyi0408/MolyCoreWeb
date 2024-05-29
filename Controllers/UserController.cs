@@ -11,9 +11,12 @@ namespace MolyCoreWeb.Controllers
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+        private readonly IUserAuthenticationService _userAuthenticationService;
+
+        public UserController(IUserService userService, IUserAuthenticationService userAuthenticationService)
         {
             _userService = userService;
+            _userAuthenticationService = userAuthenticationService;
         }
 
         // 登入頁面
@@ -34,10 +37,10 @@ namespace MolyCoreWeb.Controllers
                     Password = model.Password
                 };
 
-                var authResult = _userService.Authenticate(userDto);
+                var authResult = _userAuthenticationService.Authenticate(userDto);
                 if (authResult.Success)
                 {
-                    await _userService.SignInAsync(authResult.User, true);
+                    await _userAuthenticationService.SignInAsync(authResult.User, true);
                     // 登錄成功，重定向到首頁
                     return RedirectToAction("Index", "Home");
                 }
@@ -53,14 +56,14 @@ namespace MolyCoreWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await _userService.SignOutAsync();
+            await _userAuthenticationService.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 
         // 管理頁面
         public async Task<IActionResult> ManagementAsync()
         {
-            var users = await _userService.GetAllUserAsync();
+            var users = await _userService.GetAllAsync();
             return View(users);
         }
 
@@ -76,56 +79,11 @@ namespace MolyCoreWeb.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
-        {
-            var users = await _userService.GetAllAsync();
-            return Ok(users);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetUserById(int id)
-        {
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
-        }
-
         [HttpPost]
-        public ActionResult CreateUser([FromBody] UserDto userDto)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (userDto == null)
-            {
-                return BadRequest();
-            }
-            _userService.Create(userDto);
-            return CreatedAtAction(nameof(GetUserById), new { id = userDto.UserId }, userDto);
-        }
-
-        [HttpPut("{id}")]
-        public ActionResult UpdateUser(int id, [FromBody] UserDto userDto)
-        {
-            if (userDto == null || userDto.UserId != id)
-            {
-                return BadRequest();
-            }
-            _userService.Update(userDto);
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public ActionResult DeleteUser(int id)
-        {
-            var user = _userService.GetByIdAsync(id).Result;
-            if (user == null)
-            {
-                return NotFound();
-            }
-            _userService.Delete(user);
-            return NoContent();
+            await _userService.DeleteAsync(id);
+            return RedirectToAction("Management");
         }
     }
 }
