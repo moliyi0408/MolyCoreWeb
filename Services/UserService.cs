@@ -84,7 +84,9 @@ namespace MolyCoreWeb.Services
         //    throw new NotImplementedException();
         //}
 
-        public UserDto Authenticate(UserDto userDto)
+
+
+        public AuthenticationResult Authenticate(UserDto userDto)
         {
             //使用者輸入查找user 資料庫對應資料
             var user = _userRepository.GetAllAsync().Result
@@ -92,14 +94,22 @@ namespace MolyCoreWeb.Services
 
             if (user == null)
             {
-                return null;
+                return new AuthenticationResult
+                {
+                    Success = false,
+                    ErrorMessage = "Account or password is incorrect"
+                };
             }
-
-            return new UserDto
+         
+            return new AuthenticationResult
             {
-                UserId = user.UserId,
-                UserName = user.UserName,
-                Password = user.PasswordHash
+                Success = true,
+                User = new UserDto
+                {
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+                    Password = user.PasswordHash
+                }
             };
         }
 

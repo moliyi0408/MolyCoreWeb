@@ -20,15 +20,16 @@
                                         <div data-mdb-input-init class="form-outline mb-4">
                                             <input asp-for="UserName" class="form-control" />
                                             <label class="form-label" for="UserName">帳號</label>
-                                            @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
                                         </div>
                                         <div data-mdb-input-init class="form-outline mb-4">
                                             <input asp-for="Password" type="password" class="form-control" />
                                             <label class="form-label" for="PassWord">密碼</label>
-                                            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
                                         </div>
                                         <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" id="loginButton" type="submit">Login</button>
                                     </form>
+
+                                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
                                 </div>
                             </div>
                         </div>

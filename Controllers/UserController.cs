@@ -28,24 +28,25 @@ namespace MolyCoreWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                //var userDto = new UserDto
-                //{
-                //    UserName = model.UserName,
-                //    Password = model.Password
-                //};
-
-                var user = _userService.Authenticate(model);
-                if (user != null)
+                var userDto = new UserDto
                 {
-                    await _userService.SignInAsync(user, true);
+                    UserName = model.UserName,
+                    Password = model.Password
+                };
+
+                var authResult = _userService.Authenticate(userDto);
+                if (authResult.Success)
+                {
+                    await _userService.SignInAsync(authResult.User, true);
                     // 登錄成功，重定向到首頁
                     return RedirectToAction("Index", "Home");
                 }
 
 
-                ModelState.AddModelError("", "Invalid login attempt.");
+                ModelState.AddModelError("", authResult.ErrorMessage);
+
             }
-       
+
             return View(model);
         }
 
