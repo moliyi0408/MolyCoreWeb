@@ -1,7 +1,5 @@
 ## 架構 
-Database <=> DbContext  <=> Domain Model  <=> Repository  
- <=> Service <=> DTO <=> Controller <=> ViewModel <=> View
-
+Database <=> DbContext  <=> Domain Model  <=> Repository <=> Service <=> DTO <=> Controller <=> ViewModel <=> View
 ## 架構實現
 >Database（資料庫）：實際的資料儲存。   
 - Sqlite 實作建置
