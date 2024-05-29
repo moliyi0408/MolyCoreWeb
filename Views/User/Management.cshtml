@@ -14,9 +14,11 @@
     <tbody>
         @foreach (var user in Model)
         {
+            <tr>
                 <td>@user.UserId</td>
                 <td>@user.UserName</td>
-                <td>@user.PasswordHash</td>                   
+                <td>@user.PasswordHash</td>           
+            </tr>    
         }
     </tbody>
 </table>

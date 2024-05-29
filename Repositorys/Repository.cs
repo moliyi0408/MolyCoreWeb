@@ -1,6 +1,7 @@
 ﻿using MolyCoreWeb.Datas;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using MolyCoreWeb.Models.DBEntitiy;
 
 namespace MolyCoreWeb.Repositorys
 {
@@ -58,6 +59,12 @@ namespace MolyCoreWeb.Repositorys
         public void SaveChanges()
         {
             _context.SaveChanges();
+        }
+
+        public async Task<User> GetUserByUsernameAndPassword(string username, string password)
+        {
+            return await _context.User.FirstOrDefaultAsync(u => u.UserName == username && u.PasswordHash == password);
+
         }
     }
 }

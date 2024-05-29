@@ -28,13 +28,13 @@ namespace MolyCoreWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userDto = new UserDto
-                {
-                    UserName = model.UserName,
-                    Password = model.Password
-                };
+                //var userDto = new UserDto
+                //{
+                //    UserName = model.UserName,
+                //    Password = model.Password
+                //};
 
-                var user = _userService.Authenticate(userDto);
+                var user = _userService.Authenticate(model);
                 if (user != null)
                 {
                     await _userService.SignInAsync(user, true);
@@ -64,11 +64,16 @@ namespace MolyCoreWeb.Controllers
         }
 
         // 個人資料頁面
-        public IActionResult UserProfile()
+        public async Task<IActionResult> UserProfile(int id)
         {
-            return View();
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
         }
-        
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()

@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using MolyCoreWeb.Models.DBEntitiy;
+using System.Linq.Expressions;
 
 namespace MolyCoreWeb.Repositorys
 {
@@ -18,5 +19,8 @@ namespace MolyCoreWeb.Repositorys
         void Delete(TEntity entity);
         // 儲存異動。
         void SaveChanges();
+
+        Task<User> GetUserByUsernameAndPassword(string username, string password);
+
     }
 }

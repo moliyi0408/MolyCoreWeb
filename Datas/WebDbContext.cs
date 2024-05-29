@@ -19,6 +19,8 @@ namespace MolyCoreWeb.Datas
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>().ToTable("User");
+
             modelBuilder.Entity<UserProfile>().HasKey(u => u.ProfileId);
         }
 

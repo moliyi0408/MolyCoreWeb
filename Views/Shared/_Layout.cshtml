@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,11 +27,14 @@
                     </ul>
                     @*  ml - auto 使其在導航欄的右側 *@
                     <ul class="navbar-nav ml-auto">
+                        @if (User.Identity.IsAuthenticated && User.HasClaim(c => c.Type == "Permission" && c.Value == "admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Management">Management</a>
+                            </li>
+                        }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Management">Management</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="User" asp-action="Profile">@User.Identity.Name</a>
+                            <a class="nav-link" asp-controller="User" asp-action="Profile" asp-route-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)">@User.Identity.Name</a>
                         </li>
                         <li class="nav-item">
                             @if (User.Identity.IsAuthenticated)
