@@ -33,6 +33,21 @@ namespace MolyCoreWeb.Services
 
             await _unitOfWork.CompleteAsync(); // 保存變更
         }
+
+        public async Task CreateUserWithProfile(User user, UserProfile userProfile)
+        {
+            var existingUser = await _unitOfWork.Repository<User>().GetByCondition(u => u.UserName == user.UserName);
+            if (existingUser != null)
+            {
+                throw new Exception("Username already exists.");
+            }
+
+            await _unitOfWork.Repository<User>().Create(user);
+          
+            userProfile.UserId = user.UserId; // 确保 UserId 被正确设置
+            await _unitOfWork.Repository<UserProfile>().Create(userProfile);
+            await _unitOfWork.CompleteAsync();
+        }
         IQueryable<User> IService<User>.Reads()
         {
             throw new NotImplementedException();

@@ -92,7 +92,14 @@ namespace MolyCoreWeb.Controllers
                         Permission = "user"
                     };
 
-                    await _userService.Create(newUser);
+                    var newUserProfile = new UserProfile
+                    {
+                        Email = model.Email,
+                        DateOfBirth = model.DateOfBirth
+                    };
+
+                    await _userService.CreateUserWithProfile(newUser, newUserProfile);
+
 
                     return RedirectToAction("Login");
                 }

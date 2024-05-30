@@ -8,5 +8,7 @@ namespace MolyCoreWeb.Services
     public interface IUserService : IService<User>
     {
         Task DeleteAsync(int id);
+        Task CreateUserWithProfile(User user, UserProfile userProfile);
+
     }
 }
