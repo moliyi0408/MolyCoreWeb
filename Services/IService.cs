@@ -7,7 +7,7 @@ namespace MolyCoreWeb.Services
     {
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity> GetByIdAsync(int id);
-        void Create(TEntity entity);
+        Task Create(TEntity entity);
         IQueryable<TEntity> Reads();
         Task Update(TEntity entity);
         void Delete(TEntity entity);

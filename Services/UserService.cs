@@ -17,12 +17,17 @@ namespace MolyCoreWeb.Services
         public UserService(IRepository<User> userRepository)
         {
             _userRepository = userRepository;
- 
         }
 
-        public void Create(User entity)
+        public async Task Create(User user)
         {
-            throw new NotImplementedException();
+            // 检查用户名是否已经存在
+            var existingUser = await _userRepository.GetByCondition(u => u.UserName == user.UserName);
+            if (existingUser != null)
+            {
+                throw new Exception("Username already exists.");
+            }
+            await _userRepository.Create(user); // 保存新用户到数据库
         }
 
         IQueryable<User> IService<User>.Reads()
@@ -64,4 +69,5 @@ namespace MolyCoreWeb.Services
 
      
     }
+
 }

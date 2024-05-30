@@ -1,5 +1,6 @@
 ﻿using MolyCoreWeb.Models.DBEntitiy;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace MolyCoreWeb.Repositorys
 {
@@ -8,7 +9,7 @@ namespace MolyCoreWeb.Repositorys
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity> GetByIdAsync(int id);
         // 新增一筆資料。
-        void Create(TEntity entity);
+        Task Create(TEntity entity);
         // 取得第一筆符合條件的內容。如果符合條件有多筆，也只取得第一筆。
         TEntity Read(Expression<Func<TEntity, bool>> predicate);
         // <returns>Entity全部筆數的IQueryable。</returns>
@@ -21,6 +22,8 @@ namespace MolyCoreWeb.Repositorys
         Task SaveChanges();
 
         Task<User> GetUserByUsernameAndPassword(string username, string password);
+
+        Task<TEntity> GetByCondition(Expression<Func<TEntity, bool>> predicate);
 
     }
 }

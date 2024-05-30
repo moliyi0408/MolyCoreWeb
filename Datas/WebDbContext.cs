@@ -19,7 +19,9 @@ namespace MolyCoreWeb.Datas
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().ToTable("User");
+            modelBuilder.Entity<User>()
+            .ToTable("User")
+            .Property(u => u.UserId).ValueGeneratedOnAdd(); //將 UserId 設定為自動產生
 
             modelBuilder.Entity<UserProfile>().HasKey(u => u.ProfileId);
         }

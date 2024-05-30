@@ -16,19 +16,11 @@ namespace MolyCoreWeb.Repositorys
             _dbSet = _context.Set<TEntity>();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+     
+        public async Task Create(TEntity entity)
         {
-            return await _dbSet.ToListAsync();
-        }
-
-        public async Task<TEntity> GetByIdAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
-
-        public void Create(TEntity entity)
-        {
-            _dbSet.Add(entity);
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync(); // 确保保存更改
         }
 
         public TEntity Read(Expression<Func<TEntity, bool>> predicate)
@@ -64,6 +56,24 @@ namespace MolyCoreWeb.Repositorys
         public async Task<User> GetUserByUsernameAndPassword(string username, string password)
         {
             return await _context.User.FirstOrDefaultAsync(u => u.UserName == username && u.PasswordHash == password);
+
+        }
+
+       
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public async Task<TEntity> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<TEntity> GetByCondition(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
 
         }
     }

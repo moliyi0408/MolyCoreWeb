@@ -1,8 +1,10 @@
 ﻿@model MolyCoreWeb.Models.ViewModels.LoginViewModel;
  <!DOCTYPE html>
+ <html>
 <head>
     <meta charset="utf-8" />
     <title>會員登入 - MolyWeb</title>
+  
 </head>
 <body>
     <section class="vh-100 gradient-custom">
@@ -15,7 +17,6 @@
                                 <div class="tab-content">
                                     <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
                                     <p class="text-white-50 mb-5">Please enter your login and password!</p>
-
                                     <form id="loginForm" asp-controller="User" asp-action="Login" method="post">
                                         <div data-mdb-input-init class="form-outline mb-4">
                                             <input asp-for="UserName" class="form-control" />
@@ -25,12 +26,15 @@
                                             <input asp-for="Password" type="password" class="form-control" />
                                             <label class="form-label" for="PassWord">密碼</label>
                                         </div>
-                                        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" id="loginButton" type="submit">Login</button>
+                                        <div align="left" style="float:left">
+                                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-light btn-lg px-5" id="loginButton" type="submit">Login</button>
+                                        </div>
+                                        <div align="right">
+                                            <a asp-controller="User" asp-action="Create" class="btn btn-outline-light btn-lg px-5">Create</a>
+                                        </div>
                                     </form>
-
                                     @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-
-                                </div>
+                                </div>                          
                             </div>
                         </div>
                     </div>

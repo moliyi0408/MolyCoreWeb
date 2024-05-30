@@ -61,11 +61,44 @@ namespace MolyCoreWeb.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        // 註冊頁面
+        public IActionResult Create()
+        {
+            return View();
+        }
+
         // 管理頁面
         public async Task<IActionResult> ManagementAsync()
         {
             var users = await _userService.GetAllAsync();
             return View(users);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(UserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var newUser = new User
+                    {
+                        UserName = model.UserName,
+                        PasswordHash = model.Password,
+                        Permission = "user"
+                    };
+
+                    await _userService.Create(newUser);
+
+                    return RedirectToAction("Login");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+         
+            return View(model); // 如果模型验证失败，返回带有错误信息的视图
         }
 
         [HttpPost]

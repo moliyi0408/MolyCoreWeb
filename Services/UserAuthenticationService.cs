@@ -21,11 +21,11 @@ namespace MolyCoreWeb.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public void Create(UserDto userDto)
+        public async Task Create(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
-            _userRepository.Create(user);
-            _userRepository.SaveChanges();
+            await _userRepository.Create(user);
+            await _userRepository.SaveChanges();
         }
 
         public IQueryable<UserDto> Reads()
