@@ -12,24 +12,27 @@ namespace MolyCoreWeb.Services
 {
     public class UserService : IUserService
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UserService(IRepository<User> userRepository)
+        //private readonly IRepository<User> _userRepository;
+
+        public UserService(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task Create(User user)
         {
-            // 检查用户名是否已经存在
-            var existingUser = await _userRepository.GetByCondition(u => u.UserName == user.UserName);
+            // 檢查用戶名是否已經存在
+            var existingUser = await _unitOfWork.Repository<User>().GetByCondition(u => u.UserName == user.UserName);
             if (existingUser != null)
             {
                 throw new Exception("Username already exists.");
             }
-            await _userRepository.Create(user); 
-        }
+            await _unitOfWork.Repository<User>().Create(user);
 
+            await _unitOfWork.CompleteAsync(); // 保存變更
+        }
         IQueryable<User> IService<User>.Reads()
         {
             throw new NotImplementedException();
@@ -37,8 +40,8 @@ namespace MolyCoreWeb.Services
 
         public async Task Update(User user)
         {
-            _userRepository.Update(user);
-            await _userRepository.SaveChanges();
+            _unitOfWork.Repository<User>().Update(user);
+            await _unitOfWork.CompleteAsync(); // 保存變更
         }
 
         public void Delete(User entity)
@@ -48,26 +51,24 @@ namespace MolyCoreWeb.Services
 
         public async Task DeleteAsync(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _unitOfWork.Repository<User>().GetByIdAsync(id);
             if (user != null)
             {
-                _userRepository.Delete(user);
-                await _userRepository.SaveChanges();
+                _unitOfWork.Repository<User>().Delete(user);
+                await _unitOfWork.CompleteAsync(); // 保存變更
             }
         }
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            var users = await _userRepository.GetAllAsync();
-            return users;
+            return await _unitOfWork.Repository<User>().GetAllAsync();
         }
 
         public async Task<User> GetByIdAsync(int id)
         {
-            return await _userRepository.GetByIdAsync(id);
+            return await _unitOfWork.Repository<User>().GetByIdAsync(id);
         }
 
-      
     }
 
 }

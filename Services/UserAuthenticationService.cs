@@ -10,13 +10,13 @@ namespace MolyCoreWeb.Services
 {
     public class UserAuthenticationService : IUserAuthenticationService
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserAuthenticationService(IRepository<User> userRepository, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public UserAuthenticationService(IUnitOfWork unitOfWork, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -24,21 +24,21 @@ namespace MolyCoreWeb.Services
         public async Task Create(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
-            await _userRepository.Create(user);
-            await _userRepository.SaveChanges();
+            await _unitOfWork.Repository<User>().Create(user);
+            await _unitOfWork.CompleteAsync();
         }
 
         public IQueryable<UserDto> Reads()
         {
-            var users = _userRepository.Reads();
+            var users = _unitOfWork.Repository<User>().Reads();
             return _mapper.ProjectTo<UserDto>(users);
         }
 
         public async Task Update(UserDto userDto)
         {
             var user = _mapper.Map<User>(userDto);
-            _userRepository.Update(user);
-            await _userRepository.SaveChanges();
+            _unitOfWork.Repository<User>().Update(user);
+            await _unitOfWork.CompleteAsync();
         }
 
         public void Delete(UserDto entity)
@@ -46,21 +46,22 @@ namespace MolyCoreWeb.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<UserDto>> GetAllAsync()
+        public async Task<IEnumerable<UserDto>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var users = await _unitOfWork.Repository<User>().GetAllAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
         public async Task<UserDto> GetByIdAsync(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
+            var user = await _unitOfWork.Repository<User>().GetByIdAsync(id);
             return _mapper.Map<UserDto>(user);
         }
 
         public AuthenticationResult Authenticate(UserDto userDto)
         {
             //使用者輸入查找user 資料庫對應資料
-            var user = _userRepository.GetAllAsync().Result
+            var user = _unitOfWork.Repository<User>().GetAllAsync().Result
                 .FirstOrDefault(u => u.UserName == userDto.UserName && u.PasswordHash == userDto.Password);
 
             if (user == null)
@@ -86,7 +87,7 @@ namespace MolyCoreWeb.Services
 
         public async Task SignInAsync(UserDto userDto, bool isPersistent)
         {
-            var user = await _userRepository.GetUserByUsernameAndPassword(userDto.UserName, userDto.Password);
+            var user = await _unitOfWork.Repository<User>().GetUserByUsernameAndPassword(userDto.UserName, userDto.Password);
 
             var claims = new List<Claim>
             {
@@ -133,6 +134,6 @@ namespace MolyCoreWeb.Services
             }
         }
 
-      
     }
+
 }
