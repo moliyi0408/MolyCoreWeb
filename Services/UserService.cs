@@ -27,7 +27,7 @@ namespace MolyCoreWeb.Services
             {
                 throw new Exception("Username already exists.");
             }
-            await _userRepository.Create(user); // 保存新用户到数据库
+            await _userRepository.Create(user); 
         }
 
         IQueryable<User> IService<User>.Reads()
@@ -67,7 +67,7 @@ namespace MolyCoreWeb.Services
             return await _userRepository.GetByIdAsync(id);
         }
 
-     
+      
     }
 
 }

@@ -21,7 +21,9 @@ namespace MolyCoreWeb.Datas
         {
             modelBuilder.Entity<User>()
             .ToTable("User")
-            .Property(u => u.UserId).ValueGeneratedOnAdd(); //將 UserId 設定為自動產生
+            .HasMany(u => u.UserProfiles) //配置一對多關係(User 對 UserProfile)
+            .WithOne(up => up.User)
+            .HasForeignKey(up => up.UserId);
 
             modelBuilder.Entity<UserProfile>().HasKey(u => u.ProfileId);
         }

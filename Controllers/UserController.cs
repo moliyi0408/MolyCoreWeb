@@ -5,6 +5,7 @@ using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Models.ViewModels;
 using MolyCoreWeb.Services;
 using MolyCoreWeb.Models.DBEntitiy;
+using System.Security.Claims;
 
 namespace MolyCoreWeb.Controllers
 {
@@ -14,10 +15,13 @@ namespace MolyCoreWeb.Controllers
 
         private readonly IUserAuthenticationService _userAuthenticationService;
 
-        public UserController(IUserService userService, IUserAuthenticationService userAuthenticationService)
+        private readonly IUserProfileService _userProfileService;
+
+        public UserController(IUserService userService, IUserAuthenticationService userAuthenticationService, IUserProfileService userProfileService)
         {
             _userService = userService;
             _userAuthenticationService = userAuthenticationService;
+            _userProfileService = userProfileService;
         }
 
         // 登入頁面
@@ -128,14 +132,26 @@ namespace MolyCoreWeb.Controllers
         }
 
         // 個人資料頁面
-        public async Task<IActionResult> UserProfile(int id)
+        public async Task<IActionResult> Profile()
         {
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != null)
+            {
+                var userProfile = await _userProfileService.GetByIdAsync(int.Parse(userId));
+
+                if (userProfile == null)
+                {
+                    return NotFound();
+                }
+
+                return View(userProfile);
+            }
+            else
             {
                 return NotFound();
             }
-            return View(user);
+
+
         }
 
     }
