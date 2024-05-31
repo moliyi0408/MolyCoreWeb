@@ -1,13 +1,37 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MolyCoreWeb.Services;
 
 namespace MolyCoreWeb.Controllers
 {
     public class StockController : Controller
     {
+        private readonly ILineNotifyService _lineNotifyService;
+
         public IActionResult Index()
         {
             return View();
         }
+
+        public StockController(ILineNotifyService lineNotifyService)
+        {
+            _lineNotifyService = lineNotifyService;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendNotification(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", "Message cannot be empty.");
+                return View("Index");
+            }
+
+            await _lineNotifyService.SendMessageAsync(message);
+            ViewBag.NotificationResult = "Notification sent successfully!";
+            return View("Index");
+        }
+    
+
         [HttpPost]
         public IActionResult CalculateReasonablePrice(decimal dividend)
         {

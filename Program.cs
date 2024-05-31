@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using MolyCoreWeb.Datas;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Repositorys;
@@ -15,12 +17,18 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<WebDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("WebDbContext")));
 
-
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddHttpClient<ILineNotifyService, LineNotifyService>(client =>
+{
+    client.BaseAddress = new Uri("https://notify-api.line.me/");
+    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["LineNotify:AccessToken"]}");
+});
+
 
 //automapper configuration
 builder.Services.AddAutoMapper(typeof(Program));
