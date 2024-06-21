@@ -14,7 +14,6 @@ namespace MolyCoreWeb.Services
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        //private readonly IRepository<User> _userRepository;
 
         public UserService(IUnitOfWork unitOfWork)
         {
