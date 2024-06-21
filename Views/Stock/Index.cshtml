@@ -8,14 +8,14 @@
 
 <div class="row">
     <div class="col-md-3">
-        市場別
+        <label for="Q_MARKET_TYPE">市場別</label>
         <select id="Q_MARKET_TYPE" class="form-control">
             <option value="TWSE">證交所</option>
             <option value="OTC">櫃買中心</option>
         </select>
     </div>
     <div class="col-md-3">
-        資產別
+        <label for="Q_ASSETS_TYPE">資產別</label>
         <select id="Q_ASSETS_TYPE" class="form-control">
             <option value="股票">股票</option>
             <option value="ETF">ETF</option>
@@ -45,6 +45,8 @@
                     <th>資產別</th>
                     <th>上市日</th>
                     <th>產業別</th>
+                    <th>CFICode</th>
+                    <th>國際證券辨識號碼</th>
                 </tr>
             </thead>
             <tbody id="stock-list">
@@ -55,6 +57,7 @@
 </div>
 
 <script>
+
     function getList() {
         var marketType = $('#Q_MARKET_TYPE').val();
         var assetsType = $('#Q_ASSETS_TYPE').val();
@@ -67,25 +70,35 @@
                 Q_MARKET_TYPE: marketType,
                 Q_ASSETS_TYPE: assetsType
             }),
+            // JSON 序列化工具可能會將屬性名稱轉換為小寫
             success: function (result) {
-                console.log(result); // 打印返回结果以便调试
-                $('#result-panel').show();        
-
+                $('#result-panel').show();
                 var stockList = $('#stock-list');
                 stockList.empty();
+                console.log(result);
+                if (result.gridList && result.gridList.length > 0) {
+                    let rowsHtml = result.gridList.map(stock => `
+                <tr>
+                    <td>${stock.stocK_CODE}</td>
+                    <td>${stock.stocK_NAME}</td>
+                    <td>${stock.markeT_TYPE}</td>
+                    <td>${stock.assetS_TYPE}</td>
+                    <td>${stock.publiC_DATE}</td>
+                    <td>${stock.industry}</td>
+                    <td>${stock.cfI_CODE}</td>
+                    <td>${stock.isiN_CODE}</td>
+                </tr>
+            `).join('');
 
-                $.each(result.GridList, function (index, stock) {
-                    stockList.append('<tr>' +
-                        '<td>' + stock.SYMBOL_CODE + '</td>' +
-                        '<td>' + stock.SYMBOL_NAME + '</td>' +
-                        '<td>' + stock.MARKET_TYPE + '</td>' +
-                        '<td>' + stock.ASSETS_TYPE + '</td>' +
-                        '<td>' + stock.PUBLIC_DATE + '</td>' +
-                        '<td>' + stock.INDUSTRY + '</td>' +
-                        '</tr>');
-                });
+                    stockList.html(rowsHtml);
+                    $('#rowcnt').text(result.gridList.length);
+                } else {
+                    stockList.html('<tr><td colspan="8">沒有找到資料</td></tr>');
+                }
             },
-            error: function () {
+
+            error: function (xhr, status, error) {
+                console.error('查詢失敗:', error); // 打印错误信息到控制台
                 alert('查詢失敗');
             }
         });

@@ -30,24 +30,39 @@ namespace MolyCoreWeb.Services
             {
                 IEnumerable<StockRow> stockRows;
 
-                string sqlQuery = "SELECT * FROM Stocks WHERE MARKET_TYPE = {0}";
-
+                string marketTypeCondition = string.Empty;
+                string assetsTypeCondition = string.Empty;
 
                 switch (inModel.Q_MARKET_TYPE)
                 {
                     case "TWSE":
-                        sqlQuery = string.Format(sqlQuery, "TWSE");
+                        marketTypeCondition = "上市";
                         break;
                     case "OTC":
-                        sqlQuery = string.Format(sqlQuery, "OTC");
+                        marketTypeCondition = "上櫃";
                         break;
                     default:
                         outModel.ErrMsg = "Invalid market type.";
                         return outModel;
                 }
 
+                switch (inModel.Q_ASSETS_TYPE)
+                {
+                    case "股票":
+                        assetsTypeCondition = "股票";
+                        break;
+                    case "ETF":
+                        assetsTypeCondition = "ETF";
+                        break;
+                }
 
-                 stockRows = await _unitOfWork.Repository<StockRow>().ExecuteSqlQueryAsync(sqlQuery);
+                string sqlQuery =  string.Format(@" SELECT * FROM Stocks 
+                                                    WHERE 1 = 1
+                                                    AND MARKET_TYPE = '{0}'
+                                                    AND ASSETS_TYPE =  '{1}' "
+                        , marketTypeCondition, assetsTypeCondition);
+
+                stockRows = await _unitOfWork.Repository<StockRow>().ExecuteSqlQueryAsync(sqlQuery);
 
                 outModel.GridList = stockRows.ToList();
             }
@@ -86,16 +101,6 @@ namespace MolyCoreWeb.Services
             {
                 foreach (var stock in stockRows)
                 {
-                    //var parts = stock.STOCK_CODE.Split(new[] { '　' }, StringSplitOptions.RemoveEmptyEntries);
-                    //if (parts.Length == 2)
-                    //{
-                    //    var stockCode = parts[0];
-                    //    var stockName = parts[1];
-
-                    //    stock.STOCK_CODE = stockCode;
-                    //    stock.STOCK_NAME = stockName;
-                    //}
-
                     var existingStock = await _unitOfWork.Repository<StockRow>().GetByCondition(s => s.STOCK_CODE == stock.STOCK_CODE);
                     if (existingStock != null)
                     {
@@ -180,7 +185,6 @@ namespace MolyCoreWeb.Services
                                 }
                                 else
                                 {
-                                    // 如果拆分失败，使用默认值
                                     stockCode = codeAndName;
                                     stockName = string.Empty;
                                 }
@@ -254,7 +258,5 @@ namespace MolyCoreWeb.Services
             throw new NotImplementedException();
         }
     }
-
-
 
 }

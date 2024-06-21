@@ -16,11 +16,11 @@ namespace MolyCoreWeb.Models.DTOs
     {
         public string? ErrMsg { get; set; }
         public List<StockRow>? GridList { get; set; }
-        public string? CName { get; set; }
-        public int RowCnt { get; set; }
+       // public string? CName { get; set; }
+        public int RowCnt => GridList?.Count ?? 0; // Ensure RowCnt reflects the number of items in GridList
     }
 
-  
+
 
     //public class StockPriceRow
     //{
@@ -34,8 +34,8 @@ namespace MolyCoreWeb.Models.DTOs
     //    public string? volume { get; set; }
     //}
 
-   
-   
+
+
 
     //public class StockGetDayPriceIn
     //{

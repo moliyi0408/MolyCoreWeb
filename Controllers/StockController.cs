@@ -61,7 +61,7 @@ namespace MolyCoreWeb.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}"); // 處理失敗情況
+                return StatusCode(500, $"Internal server error: {ex.Message}"); 
             }
         }
 
@@ -86,69 +86,69 @@ namespace MolyCoreWeb.Controllers
         ////每分鐘 股票股價 現在損益 幾%
         ///
 
-        [HttpPost]
-        public IActionResult CalculateReasonablePrice(decimal dividend)
-        {
-            if (dividend <= 0)
-            {
-                return BadRequest("預估全年總配息必須大於 0");
-            }
+        //[HttpPost]
+        //public IActionResult CalculateReasonablePrice(decimal dividend)
+        //{
+        //    if (dividend <= 0)
+        //    {
+        //        return BadRequest("預估全年總配息必須大於 0");
+        //    }
 
-            decimal Dividendprice5 = dividend / 0.05m;
-            decimal Dividendprice6 = dividend / 0.06m;
-            decimal Dividendprice7 = dividend / 0.07m;
+        //    decimal Dividendprice5 = dividend / 0.05m;
+        //    decimal Dividendprice6 = dividend / 0.06m;
+        //    decimal Dividendprice7 = dividend / 0.07m;
 
-            var result = new
-            {
-                Dividendprice7,
-                Dividendprice6,
-                Dividendprice5
-            };
+        //    var result = new
+        //    {
+        //        Dividendprice7,
+        //        Dividendprice6,
+        //        Dividendprice5
+        //    };
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
-        [HttpPost]
-        public IActionResult TaxCount(decimal buyAmount, decimal sellAmount, decimal discount)
-        {
-            if (buyAmount <= 0 || sellAmount <= 0 || discount <= 0)
-            {
-                return BadRequest("所有輸入值必須大於 0");
-            }
+        //[HttpPost]
+        //public IActionResult TaxCount(decimal buyAmount, decimal sellAmount, decimal discount)
+        //{
+        //    if (buyAmount <= 0 || sellAmount <= 0 || discount <= 0)
+        //    {
+        //        return BadRequest("所有輸入值必須大於 0");
+        //    }
 
-            decimal tax = sellAmount * 0.003m;
-            decimal buyFee = buyAmount * 0.001425m * discount;
-            decimal buyTotal = buyAmount + buyFee;
-            decimal fee = sellAmount * 0.001425m * discount;
-            decimal sellFee = tax + fee;
-            decimal sellTotal = sellAmount - sellFee;
-            decimal profit = sellTotal - buyTotal;
+        //    decimal tax = sellAmount * 0.003m;
+        //    decimal buyFee = buyAmount * 0.001425m * discount;
+        //    decimal buyTotal = buyAmount + buyFee;
+        //    decimal fee = sellAmount * 0.001425m * discount;
+        //    decimal sellFee = tax + fee;
+        //    decimal sellTotal = sellAmount - sellFee;
+        //    decimal profit = sellTotal - buyTotal;
 
-            var result = new
-            {
-                BuyTotal = buyTotal,
-                Tax = tax,
-                Fee = fee,
-                SellFee = sellFee,
-                SellTotal = sellTotal,
-                Profit = profit
-            };
+        //    var result = new
+        //    {
+        //        BuyTotal = buyTotal,
+        //        Tax = tax,
+        //        Fee = fee,
+        //        SellFee = sellFee,
+        //        SellTotal = sellTotal,
+        //        Profit = profit
+        //    };
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
-        [HttpPost]
-        public IActionResult CalculatePriceBookRatio(decimal price, decimal bookValue)
-        {
-            if (price <= 0 || bookValue <= 0)
-            {
-                return BadRequest("股價和每股淨值必須大於 0");
-            }
+        //[HttpPost]
+        //public IActionResult CalculatePriceBookRatio(decimal price, decimal bookValue)
+        //{
+        //    if (price <= 0 || bookValue <= 0)
+        //    {
+        //        return BadRequest("股價和每股淨值必須大於 0");
+        //    }
 
-            decimal priceBookRatio = price / bookValue;
+        //    decimal priceBookRatio = price / bookValue;
 
-            return Ok(new { PriceBookRatio = priceBookRatio });
-        }
+        //    return Ok(new { PriceBookRatio = priceBookRatio });
+        //}
 
     }
 }
