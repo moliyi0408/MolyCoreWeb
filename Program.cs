@@ -18,16 +18,19 @@ builder.Services.AddDbContext<WebDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("WebDbContext")));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IStockService, StockService>();
 
 builder.Services.AddHttpClient<ILineNotifyService, LineNotifyService>(client =>
 {
     client.BaseAddress = new Uri("https://notify-api.line.me/");
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["LineNotify:AccessToken"]}");
 });
+
 
 
 //automapper configuration

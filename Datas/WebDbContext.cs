@@ -9,7 +9,8 @@ namespace MolyCoreWeb.Datas
 
         public DbSet<User> User { get; set; }
         public DbSet<UserProfile> UserProfile { get; set; }
-
+        public DbSet<StockRow> Stocks { get; set; }
+      
         // 資料庫上下文的建構函式，包括資料庫連接字串、資料庫提供者
         public WebDbContext(DbContextOptions<WebDbContext> options) : base(options)
         {
@@ -26,6 +27,8 @@ namespace MolyCoreWeb.Datas
             .HasForeignKey(up => up.UserId);
 
             modelBuilder.Entity<UserProfile>().HasKey(u => u.ProfileId);
+
+            modelBuilder.Entity<StockRow>().ToTable("Stocks");
         }
 
     }

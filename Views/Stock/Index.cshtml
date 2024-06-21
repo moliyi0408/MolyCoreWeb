@@ -1,70 +1,113 @@
-﻿@{
-    ViewData["Title"] = "Stock Calculator";
+﻿@model MolyCoreWeb.Models.DTOs.StockGetListOut
+
+@{
+    ViewData["Title"] = "Stock List";
 }
 
-@if (ViewBag.NotificationResult != null)
-{
-    <div class="alert alert-success">
-        @ViewBag.NotificationResult
-    </div>
-}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<form asp-action="SendNotification" method="post">
-    <div class="form-group">
-        <label for="message">Message</label>
-        <input type="text" class="form-control" id="message" name="message" />
-    </div>
-    <button type="submit" class="btn btn-primary">Send</button>
-</form>
-
-<form asp-action="CalculateReasonablePrice" method="post">
-    <div>
-        <label for="dividend">預估全年總配息(元)：</label>
-        <input type="number" step="0.01" id="dividend" name="dividend" required />
-    </div>
-    <button type="submit">計算合理股價</button>
-</form>
-
-<form asp-action="TaxCount" method="post">
-    <div>
-        <label for="buyAmount">買入成交金額：</label>
-        <input type="number" step="0.01" id="buyAmount" name="buyAmount" required />
-    </div>
-    <div>
-        <label for="sellAmount">賣出成交金額：</label>
-        <input type="number" step="0.01" id="sellAmount" name="sellAmount" required />
-    </div>
-    <div>
-        <label for="discount">券商手續費折扣（例如六折輸入 0.6）：</label>
-        <input type="number" step="0.01" id="discount" name="discount" required />
-    </div>
-    <button type="submit">計算交易稅</button>
-</form>
-
-<form asp-action="CalculatePriceBookRatio" method="post">
-    <div>
-        <label for="price">股價：</label>
-        <input type="number" step="0.01" id="price" name="price" required />
-    </div>
-    <div>
-        <label for="bookValue">每股淨值：</label>
-        <input type="number" step="0.01" id="bookValue" name="bookValue" required />
-    </div>
-    <button type="submit">計算股價淨值比</button>
-</form>
-
-<form asp-action="Calculate" method="post">
-    <div>
-        <label for="count">計算次數：</label>
-        <input type="number" id="count" name="count" required />
-    </div>
-    <div>
-        <label for="choice">功能選擇：</label>
-        <select id="choice" name="choice" required>
-            <option value="1">計算合理股價</option>
-            <option value="2">計算交易稅</option>
-            <option value="3">計算股價淨值比</option>
+<div class="row">
+    <div class="col-md-3">
+        市場別
+        <select id="Q_MARKET_TYPE" class="form-control">
+            <option value="TWSE">證交所</option>
+            <option value="OTC">櫃買中心</option>
         </select>
     </div>
-    <button type="submit">計算</button>
-</form>
+    <div class="col-md-3">
+        資產別
+        <select id="Q_ASSETS_TYPE" class="form-control">
+            <option value="股票">股票</option>
+            <option value="ETF">ETF</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <br />
+        <button type="button" class="btn btn-default" onclick="getList()">查詢</button>
+        <button type="button" class="btn btn-default" onclick="updateData()">更新</button>
+    </div>
+</div>
+
+<div id="result-panel" class="panel panel-default" style="display:none;">
+    <div class="panel-heading">
+        <span id="cname">清單</span>
+        <div style="float:right;">
+            總筆數: <span id="rowcnt"></span>
+        </div>
+    </div>
+    <div class="panel-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>代碼</th>
+                    <th>名稱</th>
+                    <th>市場別</th>
+                    <th>資產別</th>
+                    <th>上市日</th>
+                    <th>產業別</th>
+                </tr>
+            </thead>
+            <tbody id="stock-list">
+                <!-- Data will be appended here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function getList() {
+        var marketType = $('#Q_MARKET_TYPE').val();
+        var assetsType = $('#Q_ASSETS_TYPE').val();
+
+        $.ajax({
+            url: '@Url.Action("GetList", "Stock")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                Q_MARKET_TYPE: marketType,
+                Q_ASSETS_TYPE: assetsType
+            }),
+            success: function (result) {
+                console.log(result); // 打印返回结果以便调试
+                $('#result-panel').show();        
+
+                var stockList = $('#stock-list');
+                stockList.empty();
+
+                $.each(result.GridList, function (index, stock) {
+                    stockList.append('<tr>' +
+                        '<td>' + stock.SYMBOL_CODE + '</td>' +
+                        '<td>' + stock.SYMBOL_NAME + '</td>' +
+                        '<td>' + stock.MARKET_TYPE + '</td>' +
+                        '<td>' + stock.ASSETS_TYPE + '</td>' +
+                        '<td>' + stock.PUBLIC_DATE + '</td>' +
+                        '<td>' + stock.INDUSTRY + '</td>' +
+                        '</tr>');
+                });
+            },
+            error: function () {
+                alert('查詢失敗');
+            }
+        });
+    }
+
+    function updateData() {
+        $.ajax({
+            url: '@Url.Action("UpdateData", "Stock")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                Q_MARKET_TYPE: $('#Q_MARKET_TYPE').val(),
+                Q_ASSETS_TYPE: $('#Q_ASSETS_TYPE').val()
+            }),
+            success: function (response) {
+                alert('股票數據已更新');
+                console.log(response);
+            },
+            error: function (xhr, status, error) {
+                console.error('更新股票數據時發生錯誤:', error);
+                alert('更新股票數據失敗');
+            }
+        });
+    }
+</script>

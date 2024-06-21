@@ -1,6 +1,9 @@
 ## 架構 
 Database <=> DbContext  <=> Domain Model  <=> Repository <=> UnitOfWork <=> Service <=> DTO <=> Controller <=> ViewModel <=> View
 
+使用Github Actions和Azure Web應用程式 實現CI/CD部屬
+
+https://molygithub.azurewebsites.net/Stock/SendNotification
 ## 架構實現
 >Database（資料庫）：實際的資料儲存。   
 - Sqlite 實作建置

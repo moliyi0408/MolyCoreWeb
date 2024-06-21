@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Services;
 
 namespace MolyCoreWeb.Controllers
@@ -6,15 +7,19 @@ namespace MolyCoreWeb.Controllers
     public class StockController : Controller
     {
         private readonly ILineNotifyService _lineNotifyService;
+        private readonly IStockService _stockService;
+
+
+        public StockController(ILineNotifyService lineNotifyService, IStockService stockService)
+        {
+            _lineNotifyService = lineNotifyService;
+            _stockService = stockService;
+
+        }
 
         public IActionResult Index()
         {
             return View();
-        }
-
-        public StockController(ILineNotifyService lineNotifyService)
-        {
-            _lineNotifyService = lineNotifyService;
         }
 
         [HttpPost]
@@ -30,7 +35,56 @@ namespace MolyCoreWeb.Controllers
             ViewBag.NotificationResult = "Notification sent successfully!";
             return View("Index");
         }
-    
+
+        [HttpPost("GetList")]
+        public async Task<IActionResult> GetList([FromBody] StockGetListIn inModel)
+        {
+
+            StockGetListOut result = await _stockService.GetStockListAsync(inModel);
+            if (result == null || result.GridList == null || result.GridList.Count == 0)
+            {
+                return NotFound(result.ErrMsg);
+            }
+
+            return Json(result);
+        }
+
+        [HttpPost("UpdateData")]
+        public async Task<IActionResult> UpdateData([FromBody] StockGetListIn inModel)
+        {
+            Console.WriteLine("開始更新股票數據...");
+
+            try
+            {
+                await _stockService.GetStockListUpdateAsync(inModel);
+                return Ok(); // 成功處理請求
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}"); // 處理失敗情況
+            }
+        }
+
+
+        //[HttpGet("GetRealtimePrice")]
+        //public async Task<StockGetRealtimePriceOut> GetRealtimePrice([FromQuery] StockGetRealtimePriceIn inModel)
+        //{
+        //    return await _stockService.GetRealtimePriceAsync(inModel);
+        //}
+
+        //[HttpGet("GetDayPrice")]
+        //public async Task<StockGetDayPriceOut> GetDayPrice([FromQuery] StockGetDayPriceIn inModel)
+        //{
+        //    return await _stockService.GetDayPriceAsync(inModel);
+        //}
+
+        //[HttpGet("GetMonthPrice")]
+        //public async Task<StockGetMonthPriceOut> GetMonthPrice([FromQuery] StockGetMonthPriceIn inModel)
+        //{
+        //    return await _stockService.GetMonthPriceAsync(inModel);
+        //}
+        ////每分鐘 股票股價 現在損益 幾%
+        ///
 
         [HttpPost]
         public IActionResult CalculateReasonablePrice(decimal dividend)
@@ -96,38 +150,5 @@ namespace MolyCoreWeb.Controllers
             return Ok(new { PriceBookRatio = priceBookRatio });
         }
 
-        [HttpPost]
-        public IActionResult Calculate(int count, int choice)
-        {
-            if (count <= 0)
-            {
-                return BadRequest("計算次數必須大於 0");
-            }
-
-            var results = new List<object>();
-
-            for (int i = 0; i < count; i++)
-            {
-                switch (choice)
-                {
-                    case 1:
-                        // You can add logic to call CalculateReasonablePrice here
-                        results.Add("功能1計算結果");
-                        break;
-                    case 2:
-                        // You can add logic to call TaxCount here
-                        results.Add("功能2計算結果");
-                        break;
-                    case 3:
-                        // You can add logic to call CalculatePriceBookRatio here
-                        results.Add("功能3計算結果");
-                        break;
-                    default:
-                        return BadRequest("輸入錯誤，請重新輸入。");
-                }
-            }
-
-            return Ok(results);
-        }
     }
 }

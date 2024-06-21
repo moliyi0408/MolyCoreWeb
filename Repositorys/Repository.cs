@@ -76,5 +76,10 @@ namespace MolyCoreWeb.Repositorys
             return await _dbSet.FirstOrDefaultAsync(predicate);
 
         }
+
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, params object[] parameters)
+        {
+            return await _dbSet.FromSqlRaw(sql, parameters).ToListAsync();
+        }
     }
 }

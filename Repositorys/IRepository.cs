@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MolyCoreWeb.Repositorys
 {
-    public interface IRepository<TEntity> 
+    public interface IRepository<TEntity>
     {
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity> GetByIdAsync(int id);
@@ -25,5 +25,6 @@ namespace MolyCoreWeb.Repositorys
 
         Task<TEntity> GetByCondition(Expression<Func<TEntity, bool>> predicate);
 
+        Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, params object[] parameters);
     }
 }
