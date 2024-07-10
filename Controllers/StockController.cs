@@ -52,7 +52,7 @@ namespace MolyCoreWeb.Controllers
         [HttpPost("UpdateData")]
         public async Task<IActionResult> UpdateData([FromBody] StockGetListIn inModel)
         {
-            Console.WriteLine("開始更新股票數據...");
+           // Console.WriteLine("開始更新股票數據...");
 
             try
             {

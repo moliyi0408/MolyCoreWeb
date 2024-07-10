@@ -105,7 +105,7 @@ namespace MolyCoreWeb.Services
                     if (existingStock != null)
                     {
                         existingStock.STOCK_NAME = stock.STOCK_NAME;
-                        existingStock.ISIN_CODE= stock.ISIN_CODE;
+                        existingStock.ISIN_CODE = stock.ISIN_CODE;
                         existingStock.PUBLIC_DATE = stock.PUBLIC_DATE;
                         existingStock.MARKET_TYPE = stock.MARKET_TYPE;
                         existingStock.INDUSTRY = stock.INDUSTRY;
@@ -126,7 +126,6 @@ namespace MolyCoreWeb.Services
                 Console.WriteLine("No data extracted.");
             }
         }
-
         private static async Task<List<StockRow>> CrawlStockDataAsync(string url)
         {
             List<StockRow> stockRows = [];

@@ -21,10 +21,19 @@
             <option value="ETF">ETF</option>
         </select>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-6">
         <br />
-        <button type="button" class="btn btn-default" onclick="getList()">查詢</button>
-        <button type="button" class="btn btn-default" onclick="updateData()">更新</button>
+        <div class="row">
+            <div class="col-md-2">
+                <button type="button" class="btn btn-default" onclick="getList()">查詢</button>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-default" onclick="updateData()">更新</button>
+            </div>
+            <div class="col-md-2">
+                <div id="message"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -36,6 +45,7 @@
         </div>
     </div>
     <div class="panel-body">
+        <input type="text" id="stock-search" class="form-control" placeholder="搜索股票ID" onkeyup="searchStock()">
         <table class="table">
             <thead>
                 <tr>
@@ -50,17 +60,17 @@
                 </tr>
             </thead>
             <tbody id="stock-list">
-                <!-- Data will be appended here -->
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-
     function getList() {
         var marketType = $('#Q_MARKET_TYPE').val();
         var assetsType = $('#Q_ASSETS_TYPE').val();
+
+        $('#message').text('查詢中...');
 
         $.ajax({
             url: '@Url.Action("GetList", "Stock")',
@@ -70,41 +80,43 @@
                 Q_MARKET_TYPE: marketType,
                 Q_ASSETS_TYPE: assetsType
             }),
-            // JSON 序列化工具可能會將屬性名稱轉換為小寫
             success: function (result) {
                 $('#result-panel').show();
                 var stockList = $('#stock-list');
                 stockList.empty();
-                console.log(result);
+
                 if (result.gridList && result.gridList.length > 0) {
                     let rowsHtml = result.gridList.map(stock => `
-                <tr>
-                    <td>${stock.stocK_CODE}</td>
-                    <td>${stock.stocK_NAME}</td>
-                    <td>${stock.markeT_TYPE}</td>
-                    <td>${stock.assetS_TYPE}</td>
-                    <td>${stock.publiC_DATE}</td>
-                    <td>${stock.industry}</td>
-                    <td>${stock.cfI_CODE}</td>
-                    <td>${stock.isiN_CODE}</td>
-                </tr>
-            `).join('');
+                    <tr>
+                        <td class="stock-id">${stock.stocK_CODE}</td>
+                        <td>${stock.stocK_NAME}</td>
+                        <td>${stock.markeT_TYPE}</td>
+                        <td>${stock.assetS_TYPE}</td>
+                        <td>${stock.publiC_DATE}</td>
+                        <td>${stock.industry}</td>
+                        <td>${stock.cfI_CODE}</td>
+                        <td>${stock.isiN_CODE}</td>
+                    </tr>
+                `).join('');
 
                     stockList.html(rowsHtml);
                     $('#rowcnt').text(result.gridList.length);
                 } else {
                     stockList.html('<tr><td colspan="8">沒有找到資料</td></tr>');
                 }
+                $('#message').text('查詢完畢');
             },
-
             error: function (xhr, status, error) {
-                console.error('查詢失敗:', error); // 打印错误信息到控制台
+                console.error('查詢失敗:', error);
                 alert('查詢失敗');
+                $('#message').text('查詢失敗');
             }
         });
     }
 
     function updateData() {
+        $('#message').text('股票數據更新中...');
+
         $.ajax({
             url: '@Url.Action("UpdateData", "Stock")',
             type: 'POST',
@@ -115,12 +127,31 @@
             }),
             success: function (response) {
                 alert('股票數據已更新');
-                console.log(response);
+                $('#message').text('股票清單更新完畢');
             },
             error: function (xhr, status, error) {
-                console.error('更新股票數據時發生錯誤:', error);
                 alert('更新股票數據失敗');
+                $('#message').text('更新失敗：' + xhr.responseText);
             }
         });
+    }
+
+    function searchStock() {
+        var input = document.getElementById("stock-search");
+        var filter = input.value.toUpperCase();
+        var table = document.getElementById("stock-list");
+        var tr = table.getElementsByTagName("tr");
+
+        for (var i = 0; i < tr.length; i++) {
+            var td = tr[i].getElementsByClassName("stock-id")[0];
+            if (td) {
+                var txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
     }
 </script>
