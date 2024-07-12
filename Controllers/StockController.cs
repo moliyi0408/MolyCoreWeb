@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MolyCoreWeb.Models.DBEntitiy;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Services;
+using System.Security.Claims;
 
 namespace MolyCoreWeb.Controllers
 {
@@ -65,6 +67,70 @@ namespace MolyCoreWeb.Controllers
             }
         }
 
+        [HttpGet("StockDetails/{stockCode}")]
+        public async Task<IActionResult> StockDetails(string stockCode)
+        {
+            var stockInfo = await _stockService.GetStockInfoAsync(stockCode);
+            if (stockInfo == null)
+            {
+                // 動態創建頁面代碼
+                return Content($"Stock details for {stockCode} not found. Would you like to create this page?");
+            }
+            return View("StockDetails", stockInfo);
+        }
+
+        [HttpGet("Profile/{stockCode}")]
+        public async Task<IActionResult> Profile(string stockCode)
+        {
+            var stockInfo = await _stockService.GetStockInfoAsync(stockCode);
+            if (stockInfo == null)
+            {
+                return NotFound();
+            }
+            return View("Profile", stockInfo);
+        }
+
+        [HttpGet("News/{stockCode}")]
+        public async Task<IActionResult> News(string stockCode)
+        {
+            var stockInfo = await _stockService.GetStockInfoAsync(stockCode);
+            if (stockInfo == null)
+            {
+                return NotFound();
+            }
+            return View("News", stockInfo);
+        }
+
+        [HttpGet("Dividend/{stockCode}")]
+        public async Task<IActionResult> Dividend(string stockCode)
+        {
+            var stockInfo = await _stockService.GetStockInfoAsync(stockCode);
+            if (stockInfo == null)
+            {
+                return NotFound();
+            }
+            return View("Dividend", stockInfo);
+        }
+
+        [HttpPost("GetBusinessIndicatorList")]
+        public async Task<IActionResult> GetBusinessIndicatorList()
+        {
+
+           var result = await _stockService.GetBusinessIndicatorsAsync();
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Json(result);
+        }
+
+        [HttpPost("UpdateBusinessIndicator")]
+        public async Task<IActionResult> UpdateBusinessIndicator()
+        {
+            await _stockService.GetBusinessIndicatorsUpdateAsync();
+            return Ok(new { message = "Excel file downloaded and processed successfully." });
+        }
 
         //[HttpGet("GetRealtimePrice")]
         //public async Task<StockGetRealtimePriceOut> GetRealtimePrice([FromQuery] StockGetRealtimePriceIn inModel)

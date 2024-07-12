@@ -10,7 +10,10 @@ namespace MolyCoreWeb.Datas
         public DbSet<User> User { get; set; }
         public DbSet<UserProfile> UserProfile { get; set; }
         public DbSet<StockRow> Stocks { get; set; }
-      
+        public DbSet<StockInfo> StockInfo { get; set; }
+        public DbSet<BusinessIndicator> BusinessIndicators { get; set; }
+
+
         // 資料庫上下文的建構函式，包括資料庫連接字串、資料庫提供者
         public WebDbContext(DbContextOptions<WebDbContext> options) : base(options)
         {
@@ -29,6 +32,11 @@ namespace MolyCoreWeb.Datas
             modelBuilder.Entity<UserProfile>().HasKey(u => u.ProfileId);
 
             modelBuilder.Entity<StockRow>().ToTable("Stocks");
+
+            modelBuilder.Entity<StockInfo>().ToTable("StockInfo");
+
+            modelBuilder.Entity<BusinessIndicator>().ToTable("BusinessIndicators");
+
         }
 
     }

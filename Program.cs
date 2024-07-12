@@ -31,6 +31,9 @@ builder.Services.AddHttpClient<ILineNotifyService, LineNotifyService>(client =>
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["LineNotify:AccessToken"]}");
 });
 
+builder.Services.AddHttpClient(); 
+builder.Services.AddScoped<IDownloadService, DownloadService>();
+
 
 
 //automapper configuration

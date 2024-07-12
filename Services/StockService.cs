@@ -8,6 +8,10 @@ using System.Linq;
 using MolyCoreWeb.Repositorys;
 using MolyCoreWeb.Models.DBEntitiy;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 
 namespace MolyCoreWeb.Services
 {
@@ -15,13 +19,15 @@ namespace MolyCoreWeb.Services
     {
        
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDownloadService _downloadService;
 
-        public StockService( IUnitOfWork unitOfWork)
+        public StockService( IUnitOfWork unitOfWork, IDownloadService downloadService)
         {
             _unitOfWork = unitOfWork;
-
+            _downloadService = downloadService;
         }
 
+        //獲得股票清單
         public async Task<StockGetListOut> GetStockListAsync(StockGetListIn inModel)
         {
             StockGetListOut outModel = new();
@@ -74,6 +80,7 @@ namespace MolyCoreWeb.Services
             return outModel;
         }
 
+        //股票清單更新
         public async Task GetStockListUpdateAsync(StockGetListIn inModel)
         {
             if (string.IsNullOrEmpty(inModel.Q_MARKET_TYPE) || string.IsNullOrEmpty(inModel.Q_ASSETS_TYPE))
@@ -95,7 +102,7 @@ namespace MolyCoreWeb.Services
                 return;
             }
 
-            List<StockRow> stockRows = await CrawlStockDataAsync(url);
+            List<StockRow> stockRows = await DownloadStockListDataAsync(url);
 
             if (stockRows != null && stockRows.Count > 0)
             {
@@ -126,7 +133,9 @@ namespace MolyCoreWeb.Services
                 Console.WriteLine("No data extracted.");
             }
         }
-        private static async Task<List<StockRow>> CrawlStockDataAsync(string url)
+
+        //下載股票清單
+        private static async Task<List<StockRow>> DownloadStockListDataAsync(string url)
         {
             List<StockRow> stockRows = [];
 
@@ -219,6 +228,137 @@ namespace MolyCoreWeb.Services
             return stockRows;
         }
 
+        // 獲得經濟指標
+        // 獲取經濟指標
+        public async Task<IEnumerable<BusinessIndicator>> GetBusinessIndicatorsAsync()
+        {
+            try
+            {        
+                //var businessIndicators = await _unitOfWork.Repository<BusinessIndicator>().GetAllAsync();
+                string sqlQuery = string.Format(@" 
+                        SELECT *
+                        FROM BusinessIndicators
+                        WHERE Date >= DATE('now', '-1 year')
+                                                  "
+                       );
+               var businessIndicator = await _unitOfWork.Repository<BusinessIndicator>().ExecuteSqlQueryAsync(sqlQuery);
+
+                return businessIndicator;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving business indicators: {ex.Message}");
+                throw;
+            }
+        }
+
+        // 更新經濟指標
+        public async Task GetBusinessIndicatorsUpdateAsync()
+        {
+            var url = "https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvNTc4MS82MzkyL2FmYWU2OGQ1LWVjNzktNDg5NC04ODFjLTI0M2E1Nzg2ODBlZC54bHN4&n=5paw6IGe56i%2f6ZmE5Lu25pW45YiXLnhsc3g%3d&icon=.xlsx";
+
+            List<BusinessIndicator> businessIndicators = await DownloadBusinessIndicatorsFromExcel(url);
+
+            if (businessIndicators != null && businessIndicators.Count > 0)
+            {
+                foreach (var bs in businessIndicators)
+                {
+                    // Find existing indicator based on Date (example condition)
+                    var existingIndicator = await _unitOfWork.Repository<BusinessIndicator>()
+                                                          .GetByCondition(x => x.Date == bs.Date);
+
+                    if (existingIndicator != null)
+                    {
+                        // Update properties of existingIndicator with data from bs
+                        existingIndicator.LEI_CCI = bs.LEI_CCI;
+                        existingIndicator.LEI_Ex_Trend = bs.LEI_Ex_Trend;
+                        existingIndicator.CEI_CCI = bs.CEI_CCI;
+                        existingIndicator.CEI_Ex_Trend = bs.CEI_Ex_Trend;
+                        existingIndicator.LAG_CCI = bs.LAG_CCI;
+                        existingIndicator.LAG_Ex_Trend = bs.LAG_Ex_Trend;
+                        existingIndicator.BCS_Composite_Score = bs.BCS_Composite_Score;
+                        existingIndicator.BCS_Signal = bs.BCS_Signal;
+
+                        // Mark existingIndicator for update
+                        _unitOfWork.Repository<BusinessIndicator>().Update(existingIndicator);
+                    }
+                    else
+                    {
+                        await _unitOfWork.Repository<BusinessIndicator>().Create(bs);
+
+                    }
+                }
+
+                // Save changes to the database
+                await _unitOfWork.CompleteAsync();
+            }
+            else
+            {
+                Console.WriteLine("No data extracted.");
+            }
+        }
+
+        // 下載經濟指標Excel
+        private async Task<List<BusinessIndicator>> DownloadBusinessIndicatorsFromExcel(string url)
+        {
+            List<BusinessIndicator> businessIndicators = new List<BusinessIndicator>();
+
+            try
+            {
+                var outputPath = Path.Combine(Path.GetTempPath(), "downloaded_file.xlsx");
+
+                // Download Excel and process
+                await _downloadService.DownloadFileAsync(url, outputPath);
+
+                // Handle reading from Excel file
+                using (var stream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
+                {
+                    IWorkbook workbook = new XSSFWorkbook(stream);
+                    ISheet sheet = workbook.GetSheetAt(0); // Assuming we read the first sheet
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // Start from row 1 to skip headers
+                    {
+                        IRow rowData = sheet.GetRow(row);
+                        if (rowData != null)
+                        {
+                            var indicator = new BusinessIndicator
+                            {
+                                Date = DateTime.TryParseExact(rowData.GetCell(0)?.ToString(),
+                                          "dd-M月-yyyy", // Specify the exact format of your date
+                                          CultureInfo.InvariantCulture,
+                                          DateTimeStyles.None,
+                                          out DateTime parsedDate)
+                               ? parsedDate
+                               : DateTime.MinValue,
+                                LEI_CCI = double.TryParse(rowData.GetCell(1)?.ToString(), out double leiCci) ? leiCci : 0.0,
+                                LEI_Ex_Trend = double.TryParse(rowData.GetCell(2)?.ToString(), out double leiExTrend) ? leiExTrend : 0.0,
+                                CEI_CCI = double.TryParse(rowData.GetCell(3)?.ToString(), out double ceiCci) ? ceiCci : 0.0,
+                                CEI_Ex_Trend = double.TryParse(rowData.GetCell(4)?.ToString(), out double ceiExTrend) ? ceiExTrend : 0.0,
+                                LAG_CCI = double.TryParse(rowData.GetCell(5)?.ToString(), out double lagCci) ? lagCci : 0.0,
+                                LAG_Ex_Trend = double.TryParse(rowData.GetCell(6)?.ToString(), out double lagExTrend) ? lagExTrend : 0.0,
+                                BCS_Composite_Score = double.TryParse(rowData.GetCell(7)?.ToString(), out double bcsCompositeScore) ? bcsCompositeScore : 0.0,
+                                BCS_Signal = rowData.GetCell(8)?.ToString()
+                            };
+                            businessIndicators.Add(indicator);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading Excel file: {ex.Message}");
+            }
+
+            return businessIndicators;
+        }
+
+        public async Task<StockInfo> GetStockInfoAsync(string stockCode)
+        {
+            var query = _unitOfWork.Repository<StockInfo>().GetByIdAsync(int.Parse(stockCode));
+            return await query;
+        }
+
+        // IService實作 CRUD
         public Task<IEnumerable<StockRow>> GetAllAsync()
         {
             return  _unitOfWork.Repository<StockRow> ().GetAllAsync();
