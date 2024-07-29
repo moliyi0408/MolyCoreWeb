@@ -11,7 +11,6 @@ namespace MolyCoreWeb.Controllers
         private readonly ILineNotifyService _lineNotifyService;
         private readonly IStockService _stockService;
 
-
         public StockController(ILineNotifyService lineNotifyService, IStockService stockService)
         {
             _lineNotifyService = lineNotifyService;

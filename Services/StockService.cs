@@ -228,7 +228,6 @@ namespace MolyCoreWeb.Services
             return stockRows;
         }
 
-        // 獲得經濟指標
         // 獲取經濟指標
         public async Task<IEnumerable<BusinessIndicator>> GetBusinessIndicatorsAsync()
         {
