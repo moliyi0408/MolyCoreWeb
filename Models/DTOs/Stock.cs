@@ -2,9 +2,6 @@
 
 namespace MolyCoreWeb.Models.DTOs
 {
-    public class Stock
-    {
-    }
 
     public class StockGetListIn
     {

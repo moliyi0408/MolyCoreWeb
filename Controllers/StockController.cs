@@ -10,11 +10,13 @@ namespace MolyCoreWeb.Controllers
     {
         private readonly ILineNotifyService _lineNotifyService;
         private readonly IStockService _stockService;
+        private readonly IDataTableService _dataTableService;
 
-        public StockController(ILineNotifyService lineNotifyService, IStockService stockService)
+        public StockController(ILineNotifyService lineNotifyService, IStockService stockService, IDataTableService dataTableService)
         {
             _lineNotifyService = lineNotifyService;
             _stockService = stockService;
+            _dataTableService = dataTableService;
 
         }
 
@@ -40,14 +42,21 @@ namespace MolyCoreWeb.Controllers
         [HttpPost("GetList")]
         public async Task<IActionResult> GetList([FromBody] StockGetListIn inModel)
         {
-
+            //獲得數據
             StockGetListOut result = await _stockService.GetStockListAsync(inModel);
             if (result == null || result.GridList == null || result.GridList.Count == 0)
             {
                 return NotFound(result.ErrMsg);
             }
 
-            return Json(result);
+            //使用DataTableTool 自動生成圖表
+            _dataTableService.AutoSetColumns<StockRow>(); // 使用你的数据模型类
+            _dataTableService.SetRowData(result.GridList);
+
+            // 返回数据和列配置
+            var dataTable = _dataTableService.GetDataTable();
+            return Json(new { Columns = dataTable.columns, Data = result.GridList });
+            //return Json(result);
         }
 
         [HttpPost("UpdateData")]

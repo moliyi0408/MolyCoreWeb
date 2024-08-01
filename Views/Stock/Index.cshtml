@@ -10,7 +10,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
-@*     <button id="btnGetBusinessIndicators" onclick="getBusinessIndicators()">Get Business Indicators</button>*@    
     <button id="btnUpdateBusinessIndicators" class="btn btn-default" onclick="updateBusinessIndicators()">更新經濟指標</button>
     <div id="business-indicators-list" style="display: none;">
         <!-- 這裡會顯示獲取到的經濟指標 -->
@@ -77,22 +76,20 @@
                 <tbody id="stock-list">
                 </tbody>
             </table>
-
         </div>
     </div>
 
     <script>
-
-        //頁面加載完成後，自動執行
         $(document).ready(function () {
             getBusinessIndicators();
-        })
+        });
 
         var currentPage = 1;
         var pageSize = 100;
         var totalRecords = 0;
         var allData = [];
         var filteredData = [];
+        var columns = [];
 
         function getList() {
             var marketType = $('#Q_MARKET_TYPE').val();
@@ -100,26 +97,41 @@
 
             $('#message').text('查詢中...');
 
+            var requestData = {
+                Q_MARKET_TYPE: marketType,
+                Q_ASSETS_TYPE: assetsType
+            };
+
             $.ajax({
                 url: '@Url.Action("GetList", "Stock")',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({
-                    Q_MARKET_TYPE: marketType,
-                    Q_ASSETS_TYPE: assetsType
-                }),
+                data: JSON.stringify(requestData),
                 success: function (result) {
-                    $('#result-panel').show();
-                    allData = result.gridList;
-                    filteredData = allData;
-                    totalRecords = filteredData.length;
 
-                    if (allData && allData.length > 0) {
-                        displayPage(1);
+                    if (result && Array.isArray(result.data) && Array.isArray(result.columns)) {
+                        allData = result.data.map(stock => {
+                            let lowerCaseStock = {};
+                            Object.keys(stock).forEach(key => {
+                                lowerCaseStock[key.toLowerCase()] = stock[key];
+                            });
+                            return lowerCaseStock;
+                        }); 
+                        filteredData = allData;
+                        totalRecords = filteredData.length;
+                        columns = result.columns;
+
+                        if (allData.length > 0) {
+                            displayPage(1);
+                            $('#result-panel').show();
+                        } else {
+                            $('#stock-list').html('<tr><td colspan="8">沒有找到資料</td></tr>');
+                        }
+                        $('#message').text('查詢完畢');
                     } else {
-                        $('#stock-list').html('<tr><td colspan="8">沒有找到資料</td></tr>');
+                        console.error('Invalid response format:', result);
+                        $('#stock-list').html('<tr><td colspan="8">資料格式錯誤</td></tr>');
                     }
-                    $('#message').text('查詢完畢');
                 },
                 error: function (xhr, status, error) {
                     console.error('查詢失敗:', error);
@@ -138,23 +150,21 @@
             var stockList = $('#stock-list');
             stockList.empty();
 
-            let rowsHtml = pagedData.map(stock => `
-                <tr>
-                    <td class="stock-id">${stock.stocK_CODE}</td>
-                    <td class="stock-name">${stock.stocK_NAME}</td>
-                    <td>${stock.markeT_TYPE}</td>
-                    <td>${stock.assetS_TYPE}</td>
-                    <td>${stock.publiC_DATE}</td>
-                    <td>${stock.industry}</td>
-                    <td>${stock.cfI_CODE}</td>
-                    <td>${stock.isiN_CODE}</td>
-                </tr>
-            `).join('');
+            let rowsHtml = pagedData.map(stock => generateTableRow(stock)).join('');
 
             stockList.html(rowsHtml);
             $('#rowcnt').text(pagedData.length);
 
             updatePagination();
+        }
+
+        function generateTableRow(stock) {
+            let rowHtml = '';
+            columns.forEach(col => {
+                let fieldName = col.field.toLowerCase(); // 确保字段名称是小写
+                rowHtml += `<td class="${col.field}">${stock[fieldName]}</td>`;
+            });
+            return `<tr>${rowHtml}</tr>`;
         }
 
         function updatePagination() {
@@ -203,8 +213,8 @@
             var input = document.getElementById("stock-search");
             var filter = input.value.toUpperCase();
             filteredData = allData.filter(stock => {
-                var txtValueId = stock.stocK_CODE ? stock.stocK_CODE.toUpperCase() : "";
-                var txtValueName = stock.stocK_NAME ? stock.stocK_NAME.toUpperCase() : "";
+                var txtValueId = stock.stock_code ? stock.stock_code.toUpperCase() : "";
+                var txtValueName = stock.stock_name ? stock.stock_name.toUpperCase() : "";
                 return txtValueId.indexOf(filter) > -1 || txtValueName.indexOf(filter) > -1;
             });
 

@@ -6,6 +6,7 @@ using MolyCoreWeb.Datas;
 using MolyCoreWeb.Models.DTOs;
 using MolyCoreWeb.Repositorys;
 using MolyCoreWeb.Services;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +36,12 @@ builder.Services.AddHttpClient<ILineNotifyService, LineNotifyService>(client =>
 builder.Services.AddHttpClient(); 
 builder.Services.AddScoped<IDownloadService, DownloadService>();
 
+builder.Services.AddScoped<IDataTableService, DataTableService>();
 
+builder.Services.AddControllers()
+        .AddJsonOptions(opts => {
+            opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        });
 
 //automapper configuration
 builder.Services.AddAutoMapper(typeof(Program));
