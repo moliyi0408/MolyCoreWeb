@@ -363,6 +363,9 @@ namespace MolyCoreWeb.Services
             return  _unitOfWork.Repository<StockRow> ().GetAllAsync();
         }
 
+
+        // 獲取股票
+
         public Task<StockRow> GetByIdAsync(int id)
         {
             throw new NotImplementedException();

@@ -124,6 +124,7 @@ namespace MolyCoreWeb.Controllers
             return Json(result);
         }
 
+        //更新時自動重新加載GetBusinessIndicatorList
         [HttpPost("UpdateBusinessIndicator")]
         public async Task<IActionResult> UpdateBusinessIndicator()
         {

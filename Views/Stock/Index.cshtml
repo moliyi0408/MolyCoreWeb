@@ -1,7 +1,7 @@
 ﻿@model MolyCoreWeb.Models.ViewModels.StockViewModel
 
 @{
-    ViewData["Title"] = "Stock List";
+    ViewData["Title"] = "Stock";
 }
 
 <!DOCTYPE html>
@@ -56,6 +56,11 @@
         </div>
         <div class="panel-body">
             <input type="text" id="stock-search" class="form-control" placeholder="搜索股票" onkeyup="searchStock()">
+            <div id="pagination">
+                <button id="prevPage" disabled>上一頁</button>
+                <span id="pageInfo"></span>
+                <button id="nextPage">下一頁</button>
+            </div>
             <table class="table">
                 <thead>
                     <tr>
@@ -72,6 +77,7 @@
                 <tbody id="stock-list">
                 </tbody>
             </table>
+
         </div>
     </div>
 
@@ -81,6 +87,12 @@
         $(document).ready(function () {
             getBusinessIndicators();
         })
+
+        var currentPage = 1;
+        var pageSize = 100;
+        var totalRecords = 0;
+        var allData = [];
+        var filteredData = [];
 
         function getList() {
             var marketType = $('#Q_MARKET_TYPE').val();
@@ -98,27 +110,14 @@
                 }),
                 success: function (result) {
                     $('#result-panel').show();
-                    var stockList = $('#stock-list');
-                    stockList.empty();
+                    allData = result.gridList;
+                    filteredData = allData;
+                    totalRecords = filteredData.length;
 
-                    if (result.gridList && result.gridList.length > 0) {
-                        let rowsHtml = result.gridList.map(stock => `
-                                    <tr>
-                                        <td class="stock-id">${stock.stocK_CODE}</td>
-                                        <td class="stock-name">${stock.stocK_NAME}</td>
-                                        <td>${stock.markeT_TYPE}</td>
-                                        <td>${stock.assetS_TYPE}</td>
-                                        <td>${stock.publiC_DATE}</td>
-                                        <td>${stock.industry}</td>
-                                        <td>${stock.cfI_CODE}</td>
-                                        <td>${stock.isiN_CODE}</td>
-                                    </tr>
-                                `).join('');
-
-                        stockList.html(rowsHtml);
-                        $('#rowcnt').text(result.gridList.length);
+                    if (allData && allData.length > 0) {
+                        displayPage(1);
                     } else {
-                        stockList.html('<tr><td colspan="8">沒有找到資料</td></tr>');
+                        $('#stock-list').html('<tr><td colspan="8">沒有找到資料</td></tr>');
                     }
                     $('#message').text('查詢完畢');
                 },
@@ -129,6 +128,54 @@
                 }
             });
         }
+
+        function displayPage(page) {
+            currentPage = page;
+            var startIndex = (currentPage - 1) * pageSize;
+            var endIndex = Math.min(startIndex + pageSize, totalRecords);
+
+            var pagedData = filteredData.slice(startIndex, endIndex);
+            var stockList = $('#stock-list');
+            stockList.empty();
+
+            let rowsHtml = pagedData.map(stock => `
+                <tr>
+                    <td class="stock-id">${stock.stocK_CODE}</td>
+                    <td class="stock-name">${stock.stocK_NAME}</td>
+                    <td>${stock.markeT_TYPE}</td>
+                    <td>${stock.assetS_TYPE}</td>
+                    <td>${stock.publiC_DATE}</td>
+                    <td>${stock.industry}</td>
+                    <td>${stock.cfI_CODE}</td>
+                    <td>${stock.isiN_CODE}</td>
+                </tr>
+            `).join('');
+
+            stockList.html(rowsHtml);
+            $('#rowcnt').text(pagedData.length);
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            var totalPages = Math.ceil(totalRecords / pageSize);
+            $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+            $('#prevPage').prop('disabled', currentPage === 1);
+            $('#nextPage').prop('disabled', currentPage === totalPages);
+        }
+
+        $('#prevPage').click(function () {
+            if (currentPage > 1) {
+                displayPage(currentPage - 1);
+            }
+        });
+
+        $('#nextPage').click(function () {
+            var totalPages = Math.ceil(totalRecords / pageSize);
+            if (currentPage < totalPages) {
+                displayPage(currentPage + 1);
+            }
+        });
 
         function updateData() {
             $('#message').text('股票數據更新中...');
@@ -155,23 +202,14 @@
         function searchStock() {
             var input = document.getElementById("stock-search");
             var filter = input.value.toUpperCase();
-            var table = document.getElementById("stock-list");
-            var tr = table.getElementsByTagName("tr");
+            filteredData = allData.filter(stock => {
+                var txtValueId = stock.stocK_CODE ? stock.stocK_CODE.toUpperCase() : "";
+                var txtValueName = stock.stocK_NAME ? stock.stocK_NAME.toUpperCase() : "";
+                return txtValueId.indexOf(filter) > -1 || txtValueName.indexOf(filter) > -1;
+            });
 
-            for (var i = 0; i < tr.length; i++) {
-                var tdId = tr[i].getElementsByClassName("stock-id")[0];
-                var tdName = tr[i].getElementsByClassName("stock-name")[0];
-                if (tdId || tdName) {
-                    var txtValueId = tdId ? (tdId.textContent || tdId.innerText) : "";
-                    var txtValueName = tdName ? (tdName.textContent || tdName.innerText) : "";
-
-                    if (txtValueId.toUpperCase().indexOf(filter) > -1 || txtValueName.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
-            }
+            totalRecords = filteredData.length;
+            displayPage(1);
         }
 
         function getBusinessIndicators() {
