@@ -18,12 +18,21 @@ namespace MolyCoreWeb.Controllers
 
         }
 
+
+        //股票首頁
         public IActionResult Index()
         {
             return View();
         }
 
-   
+        //經濟指標顯示
+
+        public IActionResult BusinessIndicator()
+        {
+            return View();
+        }
+
+
 
         [HttpPost("GetList")]
         public async Task<IActionResult> GetList([FromBody] StockGetListIn inModel)

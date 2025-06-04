@@ -1,5 +1,97 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Business Indicator";
+}
+
+<h2>經濟指標</h2>
+
+<button id="btnUpdateBusinessIndicators" class="btn btn-default" onclick="updateBusinessIndicators()">更新經濟指標</button>
+<div id="business-indicators-list" style="display: none;">
+    <!-- 指標資料表會插入在這裡 -->
+</div>
+
+<div id="message" class="mt-3 text-success"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            getBusinessIndicators();
+        });
+
+        function getBusinessIndicators() {
+            $('#message').text('正在獲取經濟指標清單...');
+            $.ajax({
+                url: '@Url.Action("GetBusinessIndicatorList", "Stock")',
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (result) {
+                    $('#business-indicators-list').show();
+                    var table = $('<table>').addClass('table');
+                    var header = $('<thead>').append(
+                        $('<tr>').append(
+                            $('<th>').text('Date'),
+                            $('<th>').text('LEI CCI'),
+                            $('<th>').text('LEI Ex Trend'),
+                            $('<th>').text('CEI CCI'),
+                            $('<th>').text('CEI Ex Trend'),
+                            $('<th>').text('LAG CCI'),
+                            $('<th>').text('LAG Ex Trend'),
+                            $('<th>').text('BCS Composite Score'),
+                            $('<th>').text('BCS Signal')
+                        )
+                    );
+                    var body = $('<tbody>');
+
+                    if (result && result.length > 0) {
+                        result.forEach(indicator => {
+                            var row = $('<tr>').append(
+                                $('<td>').text(indicator.date),
+                                $('<td>').text(indicator.leI_CCI),
+                                $('<td>').text(indicator.leI_Ex_Trend),
+                                $('<td>').text(indicator.ceI_CCI),
+                                $('<td>').text(indicator.ceI_Ex_Trend),
+                                $('<td>').text(indicator.laG_CCI),
+                                $('<td>').text(indicator.laG_Ex_Trend),
+                                $('<td>').text(indicator.bcS_Composite_Score),
+                                $('<td>').text(indicator.bcS_Signal)
+                            );
+                            body.append(row);
+                        });
+                    } else {
+                        var row = $('<tr>').append(
+                            $('<td>').attr('colspan', '9').text('沒有找到經濟指標資料')
+                        );
+                        body.append(row);
+                    }
+
+                    table.append(header).append(body);
+                    $('#business-indicators-list').html(table);
+                    $('#message').text('經濟指標清單獲取完畢');
+                },
+                error: function (xhr, status, error) {
+                    console.error('獲取經濟指標失敗:', error);
+                    alert('獲取經濟指標失敗');
+                    $('#message').text('獲取經濟指標失敗');
+                }
+            });
+        }
+
+        function updateBusinessIndicators() {
+            $('#message').text('正在更新經濟指標...');
+
+            $.ajax({
+                url: '@Url.Action("UpdateBusinessIndicator", "Stock")',
+                type: 'POST',
+                contentType: 'application/json',
+                success: function (response) {
+                    alert('經濟指標已更新');
+                    $('#message').text('經濟指標更新完畢');
+                },
+                error: function (xhr, status, error) {
+                    console.error('更新經濟指標失敗:', error);
+                    alert('更新經濟指標失敗');
+                    $('#message').text('更新經濟指標失敗：' + xhr.responseText);
+                }
+            });
+        }
+    </script>
 }
