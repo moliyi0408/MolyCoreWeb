@@ -26,12 +26,7 @@ builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IStockService, StockService>();
 
-//LINE API
-builder.Services.AddHttpClient<ILineNotifyService, LineNotifyService>(client =>
-{
-    client.BaseAddress = new Uri("https://notify-api.line.me/");
-    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {builder.Configuration["LineNotify:AccessToken"]}");
-});
+
 
 builder.Services.AddHttpClient(); 
 builder.Services.AddScoped<IDownloadService, DownloadService>();
