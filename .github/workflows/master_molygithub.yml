@@ -26,13 +26,13 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: dotnet-app
+          path: ${{ env.DOTNET_ROOT }}/myapp
 
   deploy:
     runs-on: windows-latest
@@ -45,13 +45,14 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: .net-app
-      
+          name: dotnet-app
+          path: ./myapp
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'MolyGithub'
           slot-name: 'Production'
-          package: .
+          package: ./myapp
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_73812688B8B645F882EDB4659B65630D }}
