@@ -1,0 +1,29 @@
+name: Deploy ASP.NET Core to Azure
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Publish .NET Core app
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'MolyGithub' 
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_73812688B8B645F882EDB4659B65630D }}
+          package: ./publish
