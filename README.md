@@ -3,7 +3,7 @@ Database <=> DbContext  <=> Domain Model  <=> Repository <=> UnitOfWork <=> Serv
 
 使用Github Actions和Azure Web應用程式 實現CI/CD部屬
 
-https://molygithub.azurewebsites.net
+部屬網站 https://molygithub.azurewebsites.net
 ## 架構實現
 >Database（資料庫）：實際的資料儲存。   
 - Sqlite 實作建置
