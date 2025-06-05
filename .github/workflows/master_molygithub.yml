@@ -29,7 +29,8 @@ jobs:
         run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@7a66bfa526a1ab5e548d63fb7e4b18c4952f68e0
+
         with:
           name: dotnet-app
           path: ${{ env.DOTNET_ROOT }}/myapp
@@ -43,7 +44,8 @@ jobs:
     
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@3a5e0f2cb99d08c760c7229d0c529d5f257c3d39
+
         with:
           name: dotnet-app
           path: ./myapp
